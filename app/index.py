@@ -3,6 +3,7 @@ from flask import render_template, request, redirect, session, jsonify
 import dao
 from app import app, login
 from flask_login import login_user, logout_user
+from datetime import  datetime
 from app.models import UserRole
 
 
@@ -19,6 +20,7 @@ def index():
 
     patients = dao.load_patients(kw) if show_patients else []
     medicines = dao.load_medicines(kw) if not show_patients else []
+
 
     return render_template('index.html', patients=patients, medicines=medicines, show_patients=show_patients)
 
@@ -118,8 +120,13 @@ def update_cart(id):
     cart = session.get('cart')
 
     if cart and id in cart:
-        quantity = int(request.json.get('quantity', 0))
-        cart[id]['quantity'] = quantity
+        data = request.json
+
+        if 'quantity' in data:
+            cart[id]['quantity'] = data['quantity']
+
+        if 'cach_dung' in data:
+            cart[id]['cach_dung'] = data['cach_dung']
 
     session['cart'] = cart
 
@@ -137,10 +144,30 @@ def delete_cart(id):
 
     return jsonify(cart)
 
+@app.route('/api/confirm_phieukham', methods=['post'])
+def confirm_phieukham():
+    phone = request.form.get('phone')
+    trieu_chung = request.form.get('trieu_chung')
+    du_doan_benh = request.form.get('du_doan_benh')
+    appointment_date_str = request.form.get('appointment_date')
 
+    appointment_date = None
+    if appointment_date_str:
+        try:
+            appointment_date = datetime.strptime(appointment_date_str, '%d-%m-%YT%H:%M')
+        except ValueError:
+            return jsonify({'status': 400, 'error': 'Invalid appointment date format'})
+    cart = session.get('cart',[])
+
+    dao.add_phieukham(phone, appointment_date, trieu_chung, du_doan_benh, cart)
+
+    del session['cart']
+
+    return jsonify({'status': 200})
 
 
 
 if __name__ == '__main__':
     with app.app_context():
+        from app import admin
         app.run(debug=True)

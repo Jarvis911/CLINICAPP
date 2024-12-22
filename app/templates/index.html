@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block content %}
+
 <div class="container">
 <div class="flex">
     <!-- Sidebar -->
@@ -97,6 +98,7 @@
 
     <!-- Main Content -->
     <div class="main-content">
+        <form id="phieu-kham-form" onsubmit="submitForm(event)">
         <div class="form-container">
             <div class="form-header">
                 <h3 class="">Thông tin bệnh nhân</h3>
@@ -109,20 +111,20 @@
                     </div>
                     <div>
                         <label for="appointment-date" oninput="saveFormData()" >Ngày khám </label>
-                        <input id="appointment-date" type="datetime-local" placeholder="Ngày khám bệnh" oninput="saveFormData()"/>
+                        <input id="appointment-date" name="appointment-date" type="datetime-local" placeholder="Ngày khám bệnh" oninput="saveFormData()"/>
                     </div>
                     <div>
                         <label for="phone">Số điện thoại</label>
-                        <input id="phone" type="text" oninput="saveFormData()" readonly />
+                        <input id="phone" name="phone" type="text" oninput="saveFormData()" readonly />
                     </div>
                     <div>
-                        <label for="predict" >Dự đoán bệnh</label>
-                        <input id="predict" type="text" oninput="saveFormData()"/>
+                        <label for="symptom" >Triệu chứng</label>
+                        <input id="symptom" name="trieu_chung" type="text" oninput="saveFormData()"/>
                     </div>
                 </div>
                 <div class="du-doan-label">
-                    <label for="mobile">Dự đoán bệnh</label>
-                    <input id="mobile" type="text" oninput="saveFormData()"/>
+                    <label for="predict">Dự đoán bệnh</label>
+                    <input id="predict" name="du_doan_benh" type="text" oninput="saveFormData()"/>
                 </div>
             </div>
 
@@ -139,6 +141,7 @@
                         <th>Đơn vị</th>
                         <th>Số lượng</th>
                         <th>Cách dùng</th>
+                        <th>Xóa</th>
                     </tr>
                     </thead>
 
@@ -151,6 +154,7 @@
                         <td>
                             <input onblur="updateCart({{ c.id }}, this)" type="number" value="{{ c.quantity }}" class="form-control" />
                         </td>
+                        <td><input id="cach-dung-{{ c.id }}" name="cach-dung-{{ c.id }}" value="{{ c.cach_dung or '' }}" type="text" oninput="saveFormData()" onblur="updateCachDung({{ c.id }}, this)"/></td>
                         <td>
                             <button class="btn btn-danger" onclick="deleteCart({{ c.id }})">&times;</button>
                         </td>
@@ -163,11 +167,13 @@
 
             <div class="form-footer">
                 <button class="cancel-btn">Hủy</button>
-                <button class="add-btn">Thêm</button>
+                <button class="add-btn" type="submit" onclick="confirm_phieukham()">Thêm</button>
             </div>
         </div>
+        </form>
     </div>
 </div>
 </div>
+
 
 {% endblock %}

@@ -19,7 +19,7 @@ function fillForm(name, phone, birthday) {
         document.getElementById('phone').value = phone;
 //        document.getElementById('birthday').value = birthday;
         document.getElementById('name-of-patient').dispatchEvent(new Event('input'));
-         document.getElementById('phone').dispatchEvent(new Event('input'));
+        document.getElementById('phone').dispatchEvent(new Event('input'));
     }
 
 function saveFormData() {
@@ -27,8 +27,8 @@ function saveFormData() {
             name_of_patient: document.getElementById("name-of-patient").value,
             phone: document.getElementById("phone").value,
             appointment_date: document.getElementById("appointment-date").value,
-            gender: document.getElementById("gender").value,
-            mobile: document.getElementById("mobile").value
+            symptom: document.getElementById("symptom").value,
+            predict: document.getElementById("predict").value
         };
 
         // Gửi dữ liệu lên API
@@ -61,15 +61,38 @@ function saveFormData() {
                     document.getElementById("appointment-date").value = data.appointment_date;
                 }
                 if (data.gender) {
-                    document.getElementById("gender").value = data.gender;
+                    document.getElementById("symptom").value = data.symptom;
                 }
                 if (data.mobile) {
-                    document.getElementById("mobile").value = data.mobile;
+                    document.getElementById("predict").value = data.predict;
                 }
             })
             .catch(error => console.error('Error:', error));
 
 };
+
+function submitForm(event) {
+    event.preventDefault(); // Ngăn form gửi theo cách mặc định
+
+    const form = document.getElementById('phieu-kham-form');
+    const formData = new FormData(form); // Lấy dữ liệu từ form
+
+    fetch('/api/confirm_phieukham', {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 200) {
+            alert('Lưu thành công');
+        } else {
+            alert('Có lỗi xảy ra: ' + (data.error || 'Không xác định'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
 
  // CART
 
@@ -111,6 +134,22 @@ function updateCart(id, obj) {
     })
 }
 
+function updateCachDung(id, obj) {
+    const cachDung = obj.value; // Lấy giá trị cách dùng từ input
+
+    fetch(`/api/carts/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+            cach_dung: cachDung
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then(res => res.json()).then(data => {
+        console.log("Cách dùng đã được cập nhật:", data);
+    }).catch(error => console.error("Lỗi khi cập nhật cách dùng:", error));
+}
+
 function deleteCart(id) {
     if (confirm("Bạn chắc chắn xóa không?") === true) {
         fetch(`/api/carts/${id}`, {
@@ -120,6 +159,19 @@ function deleteCart(id) {
 
             document.getElementById(`cart${id}`).style.display = "none";
             location.reload();
+        })
+    }
+}
+
+function confirm_phieukham() {
+    if (confirm("Bạn chắc chắn thêm phiếu khám không?") === true) {
+        fetch('/api/confirm_phieukham', {
+            method: 'post'
+        }).then(res => res.json()).then(data => {
+            if (data.status === 200) {
+                alert("Thêm phiếu !");
+                location.reload();
+            }
         })
     }
 }

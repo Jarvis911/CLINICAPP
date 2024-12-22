@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from app import db, app
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
+from datetime import datetime
 import hashlib
 
 class UserRole(RoleEnum):
@@ -29,9 +30,11 @@ class BenhNhan(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
     gender = Column(String(50), nullable=False)
-    phone = Column(String(10), nullable=False)
+    phone = Column(String(10), nullable=False, unique=True)
     email = Column(String(100), nullable=True)
     birthday = Column(String(30), nullable=False)
+
+    phieu_khams = relationship('PhieuKham', backref='phieu_kham', lazy=True)
 
 
 
@@ -44,6 +47,8 @@ class BacSi(User):
     chungChi = Column(String(100), nullable=True)
     chuyenKhoa = Column(String(100), nullable=True)
     bangCap = Column(String(100), nullable=True)
+
+    phieu_khams = relationship('PhieuKham', backref='phieu_khams', lazy=True)
 
 
 class YTa(User):
@@ -61,14 +66,9 @@ class LoaiThuoc(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     tenLoaiThuoc = Column(String(100), nullable=False)
     thuoc = relationship('Thuoc', backref='loai_thuoc', lazy=True)
+    def __str__(self):
+        return self.tenLoaiThuoc
 
-
-class Thuoc(db.Model):
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(100), nullable=False)
-    unit = Column(String(50), nullable=False)
-    price = Column(Float, nullable=False)
-    loai_thuoc_id = Column(Integer, ForeignKey(LoaiThuoc.id), nullable=False)
 
 class PhieuDangKy(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -77,6 +77,40 @@ class PhieuDangKy(db.Model):
     gender = Column(String(30), nullable=False)
     birthDay = Column(String(50), nullable=False)
     diaChi = Column(String(100), nullable=True)
+
+class Thuoc(db.Model):
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False)
+    unit = Column(String(50), nullable=False)
+    price = Column(Float, nullable=False)
+    loai_thuoc_id = Column(Integer, ForeignKey(LoaiThuoc.id), nullable=False)
+    thuoc = relationship("DonThuoc", backref="thuoc")
+    def __str__(self):
+        return self.name
+
+
+class PhieuKham(db.Model):
+    __tablename__ = 'phieu_kham'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date_kham = Column(DateTime, nullable=True, default=datetime.utcnow)
+    trieu_chung = Column(String(200), nullable=True)
+    du_doan_benh = Column(String(200), nullable=True)
+
+    bac_si_id = Column(Integer, ForeignKey('bac_si.id'))
+    id_benh_nhan = Column(Integer, ForeignKey('benh_nhan.id'))
+    thuoc = relationship("DonThuoc", backref="phieu_kham")
+
+
+
+class DonThuoc(db.Model):
+    __tablename__ = 'don_thuoc'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    quantity = Column(Integer, nullable=False)
+    cach_dung = Column(String(200), nullable=True, default="Không có")
+
+    phieu_kham_id = Column(Integer, ForeignKey('phieu_kham.id'), primary_key=True, nullable=False)
+    thuoc_id = Column(Integer, ForeignKey('thuoc.id'), primary_key=True, nullable=False)
+
 
 
 
@@ -89,18 +123,18 @@ if __name__ == '__main__':
         # l2 = LoaiThuoc(tenLoaiThuoc="Cảm cúm")
         # l3 = LoaiThuoc(tenLoaiThuoc="Đau bụng")
         # db.session.add_all([l1,l2,l3])
-
+        #
         # t1 = Thuoc(name='Paracetamol', unit='Vi', price=100000, loai_thuoc_id=2)
         # t2 = Thuoc(name='Chlorpromazin', unit='Vien', price=10000, loai_thuoc_id=1)
         # t3 = Thuoc(name='Berberin', unit='Lo', price=12000, loai_thuoc_id=3)
         # db.session.add_all([t1, t2, t3])
-
-        # bn1 = BenhNhan(name="Hồ Đức Trí", gender="Nam", phone="0914117036", birthday="02/02/2004")
-        # bn2 = BenhNhan(name="Nguyễn Kiều Phước", gender="Nam", phone="0914117036", birthday="02/02/2004")
-        # bn3 = BenhNhan(name="Hồ Kiều Phước", gender="Nam", phone="0914117036", birthday="02/02/2004")
         #
-        # db.session.add_all([bn1, bn2, bn3])
+        bn1 = BenhNhan(name="Hồ Đức Trí", gender="Nam", phone="0914117035", birthday="02/02/2004")
+        bn2 = BenhNhan(name="Nguyễn Kiều Phước", gender="Nam", phone="0914117036", birthday="02/02/2004")
+        bn3 = BenhNhan(name="Hồ Kiều Phước", gender="Nam", phone="0914117037", birthday="02/02/2004")
 
+        db.session.add_all([bn1, bn2, bn3])
+        #
         # doctors = [
         #     {
         #         "name": "Nguyen Van A",
