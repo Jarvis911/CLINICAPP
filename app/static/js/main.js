@@ -175,3 +175,40 @@ function confirm_phieukham() {
         })
     }
 }
+
+
+//RECEIPT
+
+function getPhieuKham(phieuKhamId) {
+    fetch(`/api/phieu_kham/${phieuKhamId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);  // Hiển thị thông báo lỗi nếu không tìm thấy phiếu khám
+            } else {
+                // Điền dữ liệu vào container
+                document.querySelector('#benh_nhan_name').textContent = data.benh_nhan_name;
+                document.querySelector('#phieu_kham_id').textContent = data.id;
+                document.querySelector('#date_kham').textContent = data.date_kham;
+                document.querySelector('#tien_kham').textContent = `${data.tien_kham} VND`;
+
+                // Hiển thị tổng tiền thuốc
+                document.querySelector('#tong_tien').textContent = `${data.tong_tien} VND`;
+            }
+        })
+        .catch(error => console.error('Error:', error));  // Xử lý lỗi nếu có
+}
+
+function redirectToHoaDon() {
+if (confirm("Bạn chắc chắn lập hóa đơn không?") === true) {
+var phieuKhamId = document.querySelector('#phieu_kham_id').textContent;  // Lấy giá trị ID từ phần tử <p> có id="phieu_kham_id"
+
+    if (phieuKhamId && phieuKhamId !== 'None') {
+        // Chuyển hướng đến URL tương ứng với phieu_kham_id
+        window.location.href = `/create_hoadon/${phieuKhamId}`;
+    } else {
+        alert("Mã phiếu khám không hợp lệ!");
+    }
+}
+
+}

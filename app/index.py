@@ -1,5 +1,5 @@
 import math
-from flask import render_template, request, redirect, session, jsonify
+from flask import render_template, request, redirect, session, jsonify, flash, url_for
 import dao
 from app import app, login
 from flask_login import login_user, logout_user
@@ -152,6 +152,7 @@ def confirm_phieukham():
     appointment_date_str = request.form.get('appointment_date')
 
     appointment_date = None
+    #Bug - not debug
     if appointment_date_str:
         try:
             appointment_date = datetime.strptime(appointment_date_str, '%d-%m-%YT%H:%M')
@@ -165,12 +166,41 @@ def confirm_phieukham():
 
     return jsonify({'status': 200})
 
+
 #RECEIPT
-@app.route('/receipt')
-def receipt_process():
+@app.route('/receipt', methods=['GET', 'POST'])
+def list_unpaid_phieukham():
+    unpaid_phieukham = dao.load_unpaid_phieukham()
 
-    return render_template('receipt.html')
+    return render_template('receipt.html', unpaid_phieukham=unpaid_phieukham, thu_ngan_name=dao.get_thu_ngan_name(),
+        benh_nhan_name=None,
+        phieu_kham_id=None,
+        tien_kham=None,
+        tong_tien=None)
 
+@app.route('/api/phieu_kham/<int:phieu_kham_id>', methods=['GET', 'POST'])
+def get_phieu_kham(phieu_kham_id):
+    phieu_kham = dao.get_phieu_kham_id(phieu_kham_id)
+    if not phieu_kham:
+        return jsonify({'error': 'Phiếu khám không tồn tại'}), 404
+
+    # Lấy thông tin chi tiết phiếu khám
+    phieu_data = {
+        'id': phieu_kham.id,
+        'benh_nhan_name': dao.get_benh_nhan_name(phieu_kham_id),
+        'date_kham': phieu_kham.date_kham.strftime('%d-%m-%Y'),
+        'tien_kham': dao.get_tien_kham(),
+        'tong_tien': dao.get_tong_tien_thuoc(phieu_kham_id)
+    }
+
+    return jsonify(phieu_data)
+
+
+@app.route('/create_hoadon/<int:phieu_kham_id>', methods=['GET','POST'])
+def create_hoadon(phieu_kham_id):
+    dao.tao_hoa_don(phieu_kham_id)
+    flash(f'Hóa đơn cho phiếu khám {phieu_kham_id} đã được tạo thành công!', 'success')
+    return redirect(url_for('list_unpaid_phieukham'))
 
 
 

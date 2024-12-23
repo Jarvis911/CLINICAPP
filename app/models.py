@@ -68,12 +68,12 @@ class ThuNgan(User):
 class QuyDinh(db.Model):
     __tablename__ = 'quy_dinh'
     id = Column(Integer, primary_key=True, autoincrement=True)
-
     examineFee = Column(Integer, nullable=False, default=100000, index=True)
     numOfMed = Column(Integer, nullable=False, default=30)
     maxPatient = Column(Integer, nullable=False, default=40)
 
-    hoa_don = relationship("HoaDon", backref="quy_dinh")
+    hoa_don = relationship('HoaDon', backref='hoa_don')
+
 
 
 class LoaiThuoc(db.Model):
@@ -117,6 +117,7 @@ class PhieuKham(db.Model):
     date_kham = Column(DateTime, nullable=True, default=datetime.utcnow)
     trieu_chung = Column(String(200), nullable=True)
     du_doan_benh = Column(String(200), nullable=True)
+    da_xuat_hoa_don = Column(Boolean, default=False)
 
     bac_si_id = Column(Integer, ForeignKey('bac_si.id'))
     id_benh_nhan = Column(Integer, ForeignKey('benh_nhan.id'))
@@ -139,19 +140,24 @@ class DonThuoc(db.Model):
 class HoaDon(db.Model):
     __tablename__ = 'hoa_don'
     id = Column(Integer, primary_key=True, autoincrement=True)
-
-    tien_kham = Column(Integer, ForeignKey('quy_dinh.examineFee'), nullable=False)
+    quy_dinh_id = Column(Integer, ForeignKey('quy_dinh.id'), nullable=False)
     phieu_kham_id = Column(Integer, ForeignKey('phieu_kham.id'))
     thu_ngan_id = Column(Integer, ForeignKey('thu_ngan.id'), nullable=False)
+    tong_tien = Column(Integer, nullable=True)
 
-
-
+    @property
+    def tien_kham(self):
+        return self.quy_dinh.examineFee
 
 
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+
+        # qd = QuyDinh(examineFee=100000, numOfMed=30, maxPatient=40)
+        # db.session.add(qd)
+
 
         # dv1 = DonViThuoc(name="Vỉ")
         # dv2 = DonViThuoc(name="Viên")
@@ -270,5 +276,46 @@ if __name__ == '__main__':
         #         bangCap=doc['bangCap']
         #         )
         #     db.session.add(doctor)
+
+        #DATA CASHIER
+
+        # cashier = [
+        #         {
+        #             "name": "Lo Van A",
+        #             "username": "cashierA",
+        #             "password": "123",  # MD5 của "admin"
+        #             "gender": "Male",
+        #             "phone": "0912345670",
+        #             "email": "nguyenvana@example.com",
+        #             "avatar": "https://res.cloudinary.com/dpfbtypxx/image/upload/v1734261617/pengu_iaejdc.jpg",
+        #             "user_role": 4,
+        #             "bangCap": "Đại học Ngân hàng"
+        #         },
+        #         {
+        #             "name": "Hoang Thi B",
+        #             "username": "cashierrB",
+        #             "password": "123",  # MD5 của "password"
+        #             "gender": "Female",
+        #             "phone": "0912323679",
+        #             "email": "tranthib@example.com",
+        #             "avatar": "https://res.cloudinary.com/dpfbtypxx/image/upload/v1734261617/pengu_iaejdc.jpg",
+        #             "user_role": 4,
+        #             "bangCap": "Đại học Mở"
+        #         }]
+        #
+        #
+        # for cas in cashier:
+        #     cas = ThuNgan(
+        #             name=cas['name'],
+        #             username=cas['username'],
+        #             password=str(hashlib.md5(cas['password'].encode('utf-8')).hexdigest()),  # MD5 hash đã được tạo sẵn
+        #             gender=cas['gender'],
+        #             phone=cas['phone'],
+        #             email=cas['email'],
+        #             avatar=cas['avatar'],
+        #             user_role=UserRole.ThuNgan,  # Enum cho vai trò bác sĩ
+        #             bangCap=cas['bangCap']
+        #             )
+        #     db.session.add(cas)
 
         db.session.commit()
