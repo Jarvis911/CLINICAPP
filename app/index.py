@@ -21,8 +21,8 @@ def index():
     patients = dao.load_patients(kw) if show_patients else []
     medicines = dao.load_medicines(kw) if not show_patients else []
 
-
-    return render_template('index.html', patients=patients, medicines=medicines, show_patients=show_patients)
+    return render_template('index.html', patients=patients,
+                           show_patients=show_patients, medicines=medicines)
 
 
 # DANG NHAP
@@ -78,12 +78,12 @@ def add_to_cart():
         "1": {
             "id": "1",
             "name": "..",
-            "unit": "Vi",
+            "unit-id": "1",
             "quantity": 2
         }, "2": {
             "id": "2",
             "name": "..",
-            "unit": "Vien",
+            "unit-id": "2",
             "quantity": 1
         }
     }
@@ -96,7 +96,7 @@ def add_to_cart():
     name = request.json.get('name')
     unit = request.json.get('unit')
 
-    print(f"Received data: id={id}, name={name}, unit={unit}")
+    print(f"Received data: id={id}, name={name}, unit_name={unit}")
 
     if id in cart:
         cart[id]["quantity"] += 1
@@ -164,6 +164,13 @@ def confirm_phieukham():
     del session['cart']
 
     return jsonify({'status': 200})
+
+#RECEIPT
+@app.route('/receipt')
+def receipt_process():
+
+    return render_template('receipt.html')
+
 
 
 

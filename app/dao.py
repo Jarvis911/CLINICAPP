@@ -1,4 +1,4 @@
-from app.models import User, BenhNhan, Thuoc, PhieuKham, DonThuoc
+from app.models import User, BenhNhan, Thuoc, PhieuKham, DonThuoc, DonViThuoc
 from datetime import datetime
 from app import app, db
 import hashlib
@@ -8,6 +8,11 @@ from flask_login import current_user
 
 def get_user_by_id(id):
     return User.query.get(id)
+
+
+def load_medicines_unit():
+    units = DonViThuoc.query.all()  # Lấy tất cả các đơn vị thuốc
+    return {unit.id: {"name": unit.name} for unit in units}
 
 
 def load_patients(kw=None):

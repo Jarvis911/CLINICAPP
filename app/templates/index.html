@@ -40,20 +40,20 @@
                         <tr>
                             <th>Tên bệnh nhân</th>
                             <th>SĐT</th>
-                            <th>Tuổi</th>
+                            <th>Ngày sinh</th>
                             <th>Chọn</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for x in patients %}
+                        {% for p in patients %}
                         <tr>
-                            <td>{{ x.name }}</td>
-                            <td>{{ x.phone }}</td>
-                            <td>{{ x.birthday }}</td>
+                            <td>{{ p.name }}</td>
+                            <td>{{ p.phone }}</td>
+                            <td>{{ p.birthday }}</td>
                             <td>
                 <!-- Nút "+" để chọn bệnh nhân -->
                              <button class="btn btn-primary btn-sm"
-                                 onclick="fillForm('{{ x.name }}', '{{ x.phone }}')">+</button>
+                                 onclick="fillForm('{{ p.name }}', '{{ p.phone }}')">+</button>
                              </td>
                         </tr>
                         {% endfor %}
@@ -77,15 +77,15 @@
                         </thead>
                         <tbody>
                         {% for x in medicines %}
-                        <tr>
-                            <td>{{ x.name }}</td>
-                            <td>{{ x.unit }}</td>
-                            <td>{{ x.price }}</td>
-                            <td>
-                            <button class="btn btn-primary btn-sm"
-                                 onclick="addToCart({{ x.id }}, '{{ x.name }}', '{{ x.unit }}')">+</button>
-                             </td>
-                        </tr>
+                            <tr>
+                                <td>{{ x.name }}</td>
+                                <td>{{ x.unit_id }}</td>
+                                <td>{{ x.price }}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm"
+                                            onclick="addToCart({{ x.id }}, '{{ x.name }}', '{{ x.unit_id }}')">+</button>
+                                </td>
+                            </tr>
                         {% endfor %}
                         </tbody>
                     </table>

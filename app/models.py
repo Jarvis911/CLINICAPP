@@ -57,9 +57,23 @@ class YTa(User):
     chuyenMon = Column(String(100), nullable=True)
 
 
+
 class ThuNgan(User):
     id = Column(Integer, ForeignKey('user.id'), primary_key=True)
     bangCap = Column(String(100), nullable=True)
+
+    hoa_dons = relationship('HoaDon', backref='hoa_dons', lazy=True)
+
+
+class QuyDinh(db.Model):
+    __tablename__ = 'quy_dinh'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    examineFee = Column(Integer, nullable=False, default=100000, index=True)
+    numOfMed = Column(Integer, nullable=False, default=30)
+    maxPatient = Column(Integer, nullable=False, default=40)
+
+    hoa_don = relationship("HoaDon", backref="quy_dinh")
 
 
 class LoaiThuoc(db.Model):
@@ -78,10 +92,18 @@ class PhieuDangKy(db.Model):
     birthDay = Column(String(50), nullable=False)
     diaChi = Column(String(100), nullable=True)
 
+
+class DonViThuoc(db.Model):
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False)
+    note = Column(String(200), nullable=True)
+    thuoc = relationship('Thuoc', backref='don_vi_thuoc', lazy=True)
+
+
 class Thuoc(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False)
-    unit = Column(String(50), nullable=False)
+    unit_id = Column(Integer, ForeignKey(DonViThuoc.id), nullable=False)
     price = Column(Float, nullable=False)
     loai_thuoc_id = Column(Integer, ForeignKey(LoaiThuoc.id), nullable=False)
     thuoc = relationship("DonThuoc", backref="thuoc")
@@ -99,6 +121,7 @@ class PhieuKham(db.Model):
     bac_si_id = Column(Integer, ForeignKey('bac_si.id'))
     id_benh_nhan = Column(Integer, ForeignKey('benh_nhan.id'))
     thuoc = relationship("DonThuoc", backref="phieu_kham")
+    hoa_don = relationship("HoaDon", uselist=False, backref="phieu_kham")
 
 
 
@@ -113,27 +136,43 @@ class DonThuoc(db.Model):
 
 
 
+class HoaDon(db.Model):
+    __tablename__ = 'hoa_don'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    tien_kham = Column(Integer, ForeignKey('quy_dinh.examineFee'), nullable=False)
+    phieu_kham_id = Column(Integer, ForeignKey('phieu_kham.id'))
+    thu_ngan_id = Column(Integer, ForeignKey('thu_ngan.id'), nullable=False)
+
+
+
+
 
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
 
+        # dv1 = DonViThuoc(name="Vỉ")
+        # dv2 = DonViThuoc(name="Viên")
+        # dv3 = DonViThuoc(name="Lọ")
+        # db.session.add_all([dv1, dv2, dv3])
+
         # l1 = LoaiThuoc(tenLoaiThuoc="Kháng sinh")
         # l2 = LoaiThuoc(tenLoaiThuoc="Cảm cúm")
         # l3 = LoaiThuoc(tenLoaiThuoc="Đau bụng")
         # db.session.add_all([l1,l2,l3])
         #
-        # t1 = Thuoc(name='Paracetamol', unit='Vi', price=100000, loai_thuoc_id=2)
-        # t2 = Thuoc(name='Chlorpromazin', unit='Vien', price=10000, loai_thuoc_id=1)
-        # t3 = Thuoc(name='Berberin', unit='Lo', price=12000, loai_thuoc_id=3)
+        # t1 = Thuoc(name='Paracetamol', unit_id=1, price=100000, loai_thuoc_id=2)
+        # t2 = Thuoc(name='Chlorpromazin', unit_id=2, price=10000, loai_thuoc_id=1)
+        # t3 = Thuoc(name='Berberin', unit_id=3, price=12000, loai_thuoc_id=3)
         # db.session.add_all([t1, t2, t3])
         #
-        bn1 = BenhNhan(name="Hồ Đức Trí", gender="Nam", phone="0914117035", birthday="02/02/2004")
-        bn2 = BenhNhan(name="Nguyễn Kiều Phước", gender="Nam", phone="0914117036", birthday="02/02/2004")
-        bn3 = BenhNhan(name="Hồ Kiều Phước", gender="Nam", phone="0914117037", birthday="02/02/2004")
-
-        db.session.add_all([bn1, bn2, bn3])
+        # bn1 = BenhNhan(name="Hồ Đức Trí", gender="Nam", phone="0914117035", birthday="02/02/2004")
+        # bn2 = BenhNhan(name="Nguyễn Kiều Phước", gender="Nam", phone="0914117036", birthday="02/02/2004")
+        # bn3 = BenhNhan(name="Hồ Kiều Phước", gender="Nam", phone="0914117037", birthday="02/02/2004")
+        #
+        # db.session.add_all([bn1, bn2, bn3])
         #
         # doctors = [
         #     {
