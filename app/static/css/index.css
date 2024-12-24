@@ -22,9 +22,13 @@ html {
     display: flex;
 }
 
+.container {
+    width: 100%;
+}
+
 /* Sidebar styling */
 .sidebar {
-    width: 42%;
+    width: 48%;
     background-color: white;
     height: 100vh;
     box-shadow: 0 10px 12px rgba(7, 90, 88, 0.3);

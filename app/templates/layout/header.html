@@ -3,15 +3,15 @@
     <nav>
         <ul style="font-family: Cambria, sans-serif;">
             <li><a href="/">Home</a></li>
-            <li><a href="/examine">Register Now {{ current_user.user_role }}</a></li>
-            {% if current_user.user_role is UserRole.BacSi %}
-                <li><a href="/doctorform">Make Examine</a></li>
+            <li><a href="/examine">Đăng Kí Khám</a></li>
+            {% if current_user.user_role==user_role.BacSi %}
+                <li><a href="/doctorform">Khám Bệnh</a></li>
             {% endif %}
-            {% if current_user.user_role is UserRole.ThuNgan %}
-                <li><a href="/receipt"> Receipt</a></li>
+            {% if current_user.user_role==user_role.ThuNgan%}
+                <li><a href="/receipt">Lập Hóa Đơn</a></li>
             {% endif %}
-            {% if current_user.user_role is UserRole.YTa %}
-                <li><a href="/list">Make Examine List</a></li>
+            {% if current_user.user_role ==user_role.YTa%}
+                <li><a href="/list">Lập Danh Sách Khám</a></li>
             {% endif %}
 
             {% if current_user.is_authenticated %}

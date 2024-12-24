@@ -4,6 +4,7 @@ from app import db, app
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
 from datetime import datetime
+from sqlalchemy.event import listens_for
 import hashlib
 
 class UserRole(RoleEnum):
@@ -14,7 +15,6 @@ class UserRole(RoleEnum):
     USER = 5
 
 class User(db.Model, UserMixin):
-    __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
     username = Column(String(100), nullable=False, unique=True)
@@ -37,6 +37,10 @@ class BenhNhan(db.Model):
     birth = Column(DateTime, nullable=True, default=None)
 
     phieu_khams = relationship('PhieuKham', backref='phieu_kham', lazy=True)
+    @property
+    def formatted_birth(self):
+        # Nếu `birth` không phải là None, định dạng nó thành YYYY-MM-DD
+        return self.birth.strftime('%Y-%m-%d') if self.birth else None
 
 
 
@@ -161,20 +165,30 @@ class HoaDon(db.Model):
         return self.quy_dinh.examineFee
 
 
+@listens_for(Thuoc, 'before_insert')
+def check_thuoc_limit(mapper, connect, target):
+    # Đếm số lượng hàng trong bảng Thuoc
+    session = db.session
+    current_count = session.query(Thuoc).count()
+
+    maxNum = QuyDinh.query.first().numOfMed()
+    if current_count >= maxNum:
+        raise Exception("Không thể thêm thuốc mới. Số lượng đã đạt giới hạn quy định.")
+
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-
+        #
         # qd = QuyDinh(examineFee=100000, numOfMed=30, maxPatient=40)
         # db.session.add(qd)
-
-
+        #
+        #
         # dv1 = DonViThuoc(name="Vỉ")
         # dv2 = DonViThuoc(name="Viên")
         # dv3 = DonViThuoc(name="Lọ")
         # db.session.add_all([dv1, dv2, dv3])
-
+        #
         # l1 = LoaiThuoc(tenLoaiThuoc="Kháng sinh")
         # l2 = LoaiThuoc(tenLoaiThuoc="Cảm cúm")
         # l3 = LoaiThuoc(tenLoaiThuoc="Đau bụng")
@@ -185,9 +199,9 @@ if __name__ == '__main__':
         # t3 = Thuoc(name='Berberin', unit_id=3, price=12000, loai_thuoc_id=3)
         # db.session.add_all([t1, t2, t3])
         #
-        # bn1 = BenhNhan(name="Hồ Đức Trí", gender="Nam", phone="0914117035", birthday="02/02/2004")
-        # bn2 = BenhNhan(name="Nguyễn Kiều Phước", gender="Nam", phone="0914117036", birthday="02/02/2004")
-        # bn3 = BenhNhan(name="Hồ Kiều Phước", gender="Nam", phone="0914117037", birthday="02/02/2004")
+        # bn1 = BenhNhan(name="Hồ Đức Trí", gender="Nam", phone="0914117035", birth="2004-02-02")
+        # bn2 = BenhNhan(name="Nguyễn Kiều Phước", gender="Nam", phone="0914117036", birth="2004-02-02")
+        # bn3 = BenhNhan(name="Hồ Kiều Phước", gender="Nam", phone="0914117037", birth="2004-02-02")
         #
         # db.session.add_all([bn1, bn2, bn3])
         #
@@ -287,9 +301,9 @@ if __name__ == '__main__':
         #         bangCap=doc['bangCap']
         #         )
         #     db.session.add(doctor)
-
-        #DATA CASHIER
-
+        #
+        #
+        #
         # cashier = [
         #         {
         #             "name": "Lo Van A",
@@ -328,9 +342,9 @@ if __name__ == '__main__':
         #             bangCap=cas['bangCap']
         #             )
         #     db.session.add(cas)
-
-        #DATA NURSE
-
+        #
+        #
+        #
         # nurse = [
         #         {
         #             "name": "Hoang Thai Huy",
@@ -372,5 +386,18 @@ if __name__ == '__main__':
         #             chuyenMon=nur['chuyenMon']
         #             )
         #     db.session.add(nur)
+        #
+        #
+        # admin_user = ADMIN(
+        #     name="Admin User",
+        #     username="adminuser",
+        #     password=str(hashlib.md5('Admin@123'.encode('utf-8')).hexdigest()),
+        #     gender="Male",
+        #     phone="1234567890",
+        #     email="admin@example.com",
+        #     avatar='https://res.cloudinary.com/dpfbtypxx/image/upload/v1734261617/pengu_iaejdc.jpg',
+        #     user_role=UserRole.ADMIN
+        # )
+        # db.session.add(admin_user)
 
         db.session.commit()

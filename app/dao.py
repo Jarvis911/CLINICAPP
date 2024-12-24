@@ -1,10 +1,10 @@
-from app.models import (User, BenhNhan, Thuoc, PhieuKham, DonThuoc, BacSi,
-                        DonViThuoc, HoaDon, QuyDinh, ThuNgan, DangKyKham, DsKham)
+from app.models import (User, BenhNhan, Thuoc, PhieuKham, DonThuoc, BacSi, UserRole,
+                        DonViThuoc, HoaDon, QuyDinh, ThuNgan, DangKyKham, DsKham, LoaiThuoc)
 from datetime import datetime
 from app import app, db
 from typing import cast
 import hashlib
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from sqlalchemy.types import Date
 import cloudinary.uploader
 from flask_login import current_user
@@ -28,6 +28,8 @@ def load_patients(kw=None):
 
     return query.all()
 
+def load_user_role():
+    return UserRole
 
 def load_medicines(kw=None):
     query = Thuoc.query
@@ -38,10 +40,14 @@ def load_medicines(kw=None):
     return query.all()
 
 
-def auth_user(username, password):
+def auth_user(username, password, role=None):
     password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
     u = User.query.filter(User.username.__eq__(username.strip()),
                           User.password.__eq__(password))
+
+    if role:
+        u = u.filter(User.user_role.__eq__(role))
+
     return u.first()
 
 
@@ -246,13 +252,23 @@ def get_phieu_list(date):
     return result
 
 def add_ds_kham(phieu_ids):
-    # Lấy thông tin user hiện tại (ví dụ: thu_ngan_id)
-    y_ta_id = current_user.id  # Thay bằng thông tin từ session hoặc logic xác định
+
+    y_ta_id = current_user.id
+    num_phieu_to_add = len(phieu_ids)
+
+    maxPatients = QuyDinh.query.first().maxPatient
+
+    if num_phieu_to_add > maxPatients:
+        raise ValueError(f"Số lượng phiếu đăng ký vượt quá giới hạn cho phép ({maxPatients}).")
+
 
     # Tạo một danh sách khám mới
     danh_sach_kham = DsKham(y_ta_id=y_ta_id, created_date=datetime.now())
+
+
     db.session.add(danh_sach_kham)
     db.session.flush()  # Lưu tạm để lấy `id` của danh sách khám
+
 
     # Cập nhật các phiếu đăng ký được chọn
     DangKyKham.query.filter(DangKyKham.id.in_(phieu_ids)).update(
@@ -261,4 +277,26 @@ def add_ds_kham(phieu_ids):
     )
 
     db.session.commit()
+
+    #THONG KE
+
+    # def revenue_stats(kw=None):
+    #     query = db.session.query(Thuoc.id, Thuoc.name, func.sum(ReceiptDetails.quantity * ReceiptDetails.unit_price)) \
+    #         .join(ReceiptDetails, ReceiptDetails.thuoc_id.__eq__(Thuoc.id)).group_by(Thuoc.id)
+    #
+    #     if kw:
+    #         query = query.filter(Thuoc.name.contains(kw))
+    #
+    #     return query.all()
+    #
+    # def period_stats(p='month', year=datetime.now().year):
+    #     return db.session.query(func.extract(p, Receipt.created_date),
+    #                             func.sum(ReceiptDetails.quantity * ReceiptDetails.unit_price)) \
+    #         .join(ReceiptDetails, ReceiptDetails.receipt_id.__eq__(Receipt.id)) \
+    #         .group_by(func.extract(p, Receipt.created_date), func.extract('year', Receipt.created_date)) \
+    #         .order_by().all()
+
+    def stats_products():
+        return db.session.query(LoaiThuoc.id, LoaiThuoc.tenLoaiThuoc, func.count(Thuoc.id)) \
+            .join(Thuoc, Thuoc.LoaiThuoc_id.__eq__(LoaiThuoc.id), isouter=True).group_by(LoaiThuoc.id).all()
 

@@ -1,11 +1,11 @@
 function showPatients() {
             const kw = document.getElementById("kw").value;
-            window.location.href = `/?kw=${encodeURIComponent(kw)}&type=patients`;
+            window.location.href = `/doctorform?kw=${encodeURIComponent(kw)}&type=patients`;
         }
 
 function showMedicines() {
            const kw = document.getElementById("kw").value;
-           window.location.href = `/?kw=${encodeURIComponent(kw)}&type=medicines`;
+           window.location.href = `/doctorform?kw=${encodeURIComponent(kw)}&type=medicines`;
         }
 
 function setType(type) {
