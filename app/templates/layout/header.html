@@ -3,10 +3,17 @@
     <nav>
         <ul style="font-family: Cambria, sans-serif;">
             <li><a href="/">Home</a></li>
-            <li><a href="/examination">Register Now</a></li>
-            <li><a href="/receipt"> Receipt</a></li>
-            <li><a href="/">About</a></li>
-            <li><a href="/">Services</a></li>
+            <li><a href="/examine">Register Now {{ current_user.user_role }}</a></li>
+            {% if current_user.user_role is UserRole.BacSi %}
+                <li><a href="/doctorform">Make Examine</a></li>
+            {% endif %}
+            {% if current_user.user_role is UserRole.ThuNgan %}
+                <li><a href="/receipt"> Receipt</a></li>
+            {% endif %}
+            {% if current_user.user_role is UserRole.YTa %}
+                <li><a href="/list">Make Examine List</a></li>
+            {% endif %}
+
             {% if current_user.is_authenticated %}
             <li>
                     <a href="/">

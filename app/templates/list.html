@@ -1,0 +1,69 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}
+    <title>LẬP DANH SÁCH KHÁM</title>
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/list.css') }}"/>
+{% endblock %}
+
+
+{% block content %}
+<div class="container mt-4">
+    <div class="box mb-4">
+        <form name="search" class="form-inline" id="search-form" method="post">
+            <div class="form-group">
+                <label for="date" class="mr-2">Chọn ngày lập danh sách:</label>
+                <input id="date" type="date" name="date" class="form-control mr-2" required>
+                <button onclick="get_phieu_dang_ky()" type="submit" class="btn btn-primary">Tìm</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h2 class="mb-0">DANH SÁCH ĐANG LẬP</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="phieu-dang-lap" class="table table-bordered">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Mã Phiếu</th>
+                            <th>Tên Bệnh Nhân</th>
+                            <th>SĐT</th>
+                            <th>Ngày khám</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if list %}
+                        {% for l in list %}
+                            <tr>
+                                <td>{{ l.phieu_id }}</td>
+                                <td>{{ l.benh_nhan_name }}</td>
+                                <td>{{ l.benh_nhan_phone }}</td>
+                                <td>{{ l.appointment_date }}</td>
+
+                                <td>
+                                    <input data-phieu-id="{{ l.phieu_id }}" type="checkbox" class="btn btn-primary btn-sm"
+                                            onclick=""/>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-footer text-center">
+        <button class="btn btn-secondary mr-2 cancel-btn">Hủy</button>
+        <button onclick="submitDanhSach()" class="btn btn-success add-btn">Lập Danh Sách</button>
+    </div>
+</div>
+
+{% endblock %}
+

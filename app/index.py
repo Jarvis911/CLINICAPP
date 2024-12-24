@@ -1,14 +1,21 @@
-import math
+
 from flask import render_template, request, redirect, session, jsonify, flash, url_for
 import dao
 from app import app, login
-from flask_login import login_user, logout_user
+from flask_login import login_user, logout_user, login_required, current_user
 from datetime import  datetime
-from app.models import UserRole
+
 
 
 
 @app.route("/")
+def home():
+
+    return render_template('index.html')
+
+
+@app.route("/doctorform")
+@login_required
 def index():
     if 'cart' not in session:
         session['cart'] = {}
@@ -21,8 +28,9 @@ def index():
     patients = dao.load_patients(kw) if show_patients else []
     medicines = dao.load_medicines(kw) if not show_patients else []
 
-    return render_template('index.html', patients=patients,
+    return render_template('doctorform.html', patients=patients,
                            show_patients=show_patients, medicines=medicines)
+
 
 
 # DANG NHAP
@@ -169,6 +177,7 @@ def confirm_phieukham():
 
 #RECEIPT
 @app.route('/receipt', methods=['GET', 'POST'])
+@login_required
 def list_unpaid_phieukham():
     unpaid_phieukham = dao.load_unpaid_phieukham()
 
@@ -201,6 +210,57 @@ def create_hoadon(phieu_kham_id):
     dao.tao_hoa_don(phieu_kham_id)
     flash(f'Hóa đơn cho phiếu khám {phieu_kham_id} đã được tạo thành công!', 'success')
     return redirect(url_for('list_unpaid_phieukham'))
+
+
+#DANG KI KHAM
+@app.route('/examine', methods=['GET', 'POST'])
+@login_required
+def submit_form():
+    success_msg = None
+
+    if request.method.__eq__('POST'):
+        name = request.form['name']
+        phone = request.form['phone']
+        birth = request.form['birth']
+        email = request.form['email']
+        gender = request.form['gender']
+        appointment_date_str = datetime.strptime(request.form.get('appointment_date'), '%Y-%m-%d').strftime('%Y-%m-%d')
+
+        dangki = dao.add_ExamineForm(phone,name, birth, gender,email, appointment_date_str)
+
+        success_msg = dangki
+
+
+    return render_template('examine.html', success_msg = success_msg)
+
+
+# LAP DANH SACH KHAM
+
+@app.route('/list', methods=['GET', 'POST'])
+@login_required
+def lap_danh_sach_view():
+    if request.method.__eq__('POST'):
+        date = request.form.get("date")
+        list = dao.get_phieu_list(date)
+        return render_template('list.html', list=list)
+
+    return render_template('list.html')
+
+
+
+
+@app.route('/lap-danh-sach', methods=['POST'])
+def lap_danh_sach():
+    data = request.get_json()
+    phieu_ids = data.get('phieu_ids')
+
+    if not data:
+        return jsonify({'message': 'Không có phiếu nào được chọn!'}), 400
+
+    dao.add_ds_kham(phieu_ids)
+    return jsonify({'message': 'Lập thành công!'}), 200
+
+
 
 
 

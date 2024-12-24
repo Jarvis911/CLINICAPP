@@ -1,0 +1,179 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}
+    <title>LẬP PHIẾU KHÁM</title>
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}"/>
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+<div class="flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <nav class="">
+            <a onclick="showPatients()" class="btn-find">
+                <i class="bi bi-people"></i><span>Bệnh nhân</span>
+            </a>
+            <span class="divider" style="color:rgba(128, 128, 128, 0.488)">|</span>
+            <a onclick="showMedicines()" class="btn-find">
+                <i class="bi bi-capsule-pill"></i><span>Thuốc</span>
+            </a>
+        </nav>
+
+        <div class="container">
+            <div class="box">
+                <form name="search">
+                    <input type="hidden" id="type" name="type" value="{{ request.args.get('type', '') }}">
+                    <input type="text" class="input" id="kw" name="kw" value="{{ request.args.get('kw', '') }}">
+                </form>
+            </div>
+            <div class="container">
+                {% if show_patients %}
+                <div class="table-responsive"
+                     style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; margin:5px">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Tên bệnh nhân</th>
+                            <th>SĐT</th>
+                            <th>Ngày sinh</th>
+                            <th>Chọn</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for p in patients %}
+                        <tr>
+                            <td>{{ p.name }}</td>
+                            <td>{{ p.phone }}</td>
+                            <td>{{ p.birthday }}</td>
+                            <td>
+                <!-- Nút "+" để chọn bệnh nhân -->
+                             <button class="btn btn-primary btn-sm"
+                                 onclick="fillForm('{{ p.name }}', '{{ p.phone }}')">+</button>
+                             </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+
+                {% if not show_patients %}
+                <div class="table-responsive"
+                     style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; margin:5px">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Tên thuốc</th>
+                            <th>Đơn vị thuốc</th>
+                            <th>Giá tiền</th>
+                            <th>Thêm</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for x in medicines %}
+                            <tr>
+                                <td>{{ x.name }}</td>
+                                <td>{{ x.unit_id }}</td>
+                                <td>{{ x.price }}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm"
+                                            onclick="addToCart({{ x.id }}, '{{ x.name }}', '{{ x.unit_id }}')">+</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <form id="phieu-kham-form" onsubmit="submitForm(event)">
+        <div class="form-container">
+            <div class="form-header">
+                <h3 class="">Thông tin bệnh nhân</h3>
+            </div>
+            <div class="form-body">
+                <div class="grid">
+                    <div>
+                        <label for="name-of-patient">Họ tên</label>
+                        <input id="name-of-patient" placeholder="Tên của bệnh nhân" oninput="saveFormData()" readonly />
+                    </div>
+                    <div>
+                        <label for="appointment-date" oninput="saveFormData()" >Ngày khám </label>
+                        <input id="appointment-date" name="appointment-date" type="datetime-local" placeholder="Ngày khám bệnh" oninput="saveFormData()"/>
+                    </div>
+                    <div>
+                        <label for="phone">Số điện thoại</label>
+                        <input id="phone" name="phone" type="text" oninput="saveFormData()" readonly />
+                    </div>
+                    <div>
+                        <label for="symptom" >Triệu chứng</label>
+                        <input id="symptom" name="trieu_chung" type="text" oninput="saveFormData()"/>
+                    </div>
+                </div>
+                <div class="du-doan-label">
+                    <label for="predict">Dự đoán bệnh</label>
+                    <input id="predict" name="du_doan_benh" type="text" oninput="saveFormData()"/>
+                </div>
+            </div>
+
+            <div class="form-header">
+                <h3 class="">Đơn thuốc</h3>
+            </div>
+
+            <div class="table-container">
+                <table class="table-medicine">
+                    <thead>
+                    <tr>
+                        <th>Mã thuốc</th>
+                        <th>Thuốc</th>
+                        <th>Đơn vị</th>
+                        <th>Số lượng</th>
+                        <th>Cách dùng</th>
+                        <th>Xóa</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for c in session['cart'].values() %}
+                    <tr id="cart{{ c.id }}">
+                        <td>{{ c.id }}</td>
+                        <td>{{ c.name }}</td>
+                        <td>{{ c.unit }}</td>
+                        <td>
+                            <input onblur="updateCart({{ c.id }}, this)" type="number" value="{{ c.quantity }}" class="form-control" />
+                        </td>
+                        <td><input id="cach-dung-{{ c.id }}" name="cach-dung-{{ c.id }}" value="{{ c.cach_dung or '' }}" type="text" oninput="saveFormData()" onblur="updateCachDung({{ c.id }}, this)"/></td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteCart({{ c.id }})">&times;</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            </div>
+
+
+            <div class="form-footer">
+                <button class="cancel-btn">Hủy</button>
+                <button class="add-btn" type="submit" onclick="confirm_phieukham()">Thêm</button>
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+</div>
+
+
+{% endblock %}

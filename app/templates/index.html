@@ -1,179 +1,159 @@
 {% extends 'layout/base.html' %}
 
 {% block title %}
-    <title>Patient Information Form</title>
+    <title>TRANG CHỦ</title>
 {% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}"/>
 {% endblock %}
 
 {% block content %}
-
-<div class="container">
-<div class="flex">
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <nav class="">
-            <a onclick="showPatients()" class="btn-find">
-                <i class="bi bi-people"></i><span>Bệnh nhân</span>
-            </a>
-            <span class="divider" style="color:rgba(128, 128, 128, 0.488)">|</span>
-            <a onclick="showMedicines()" class="btn-find">
-                <i class="bi bi-capsule-pill"></i><span>Thuốc</span>
-            </a>
-        </nav>
-
-        <div class="container">
-            <div class="box">
-                <form name="search">
-                    <input type="hidden" id="type" name="type" value="{{ request.args.get('type', '') }}">
-                    <input type="text" class="input" id="kw" name="kw" value="{{ request.args.get('kw', '') }}">
-                </form>
+<section class="hero">
+        <div class="hero-text">
+            <p style="color: grey">Phòng khám PokeClinic - Phòng khám đa khoa </p>
+            <h1>Một cơ thể khỏe mạnh là ngôi nhà của một tâm hồn mạnh mẽ.</h1>
+            <p style="color: grey">Bắt đầu khám phá.</p>
+            <div class="hero-buttons">
+                <i class="fa-solid fa-down-long"></i>
             </div>
-            <div class="container">
-                {% if show_patients %}
-                <div class="table-responsive"
-                     style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; margin:5px">
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>Tên bệnh nhân</th>
-                            <th>SĐT</th>
-                            <th>Ngày sinh</th>
-                            <th>Chọn</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for p in patients %}
-                        <tr>
-                            <td>{{ p.name }}</td>
-                            <td>{{ p.phone }}</td>
-                            <td>{{ p.birthday }}</td>
-                            <td>
-                <!-- Nút "+" để chọn bệnh nhân -->
-                             <button class="btn btn-primary btn-sm"
-                                 onclick="fillForm('{{ p.name }}', '{{ p.phone }}')">+</button>
-                             </td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+        </div>
+        <div class="hero-image">
+            <img alt="" src="{{ url_for('static', filename='image/doctor.png') }}" />
+            <div class="overlay">
+                <p>Cùng chúng tôi hướng tới một tương lai tốt đẹp!</p>
+                <button>Đặt lịch khám</button>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="services">
+            <h2>
+                Các Dịch Vụ Của Chúng Tôi
+            </h2>
+            <div class="service-cards">
+                <div class="service-card">
+                    <i class="fas fa-user-md">
+                    </i>
+                    <h3>
+                        Bác sĩ tư vấn
+                    </h3>
+                    <p>
+                        Chúng tôi cung cấp dịch vụ tư vấn trực tuyến với đội ngũ bác sĩ chuyên nghiệp, giúp bạn giải đáp
+                        mọi thắc mắc về sức khỏe một cách nhanh chóng và chính xác.
+                    </p>
                 </div>
-                {% endif %}
+                <div class="service-card">
+                    <i class="fas fa-calendar-check">
+                    </i>
+                    <h3>
+                        Đặt lịch khám bệnh </h3>
+                    <p>PokeClinc giúp khách hàng dễ dàng đặt lịch khám bệnh trực tuyến, tiết kiệm thời gian và đảm bảo
+                        sự thuận tiện trong việc khám chữa bệnh.</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-ambulance">
+                    </i>
+                    <h3>
+                        Hỗ trợ cấp cứu
+                    </h3>
+                    <p>
+                        Dịch vụ hỗ trợ cấp cứu của chúng tôi hoạt động 24/7, sẵn sàng tiếp nhận và xử lý mọi tình huống
+                        khẩn cấp một cách nhanh chóng và hiệu quả.
+                    </p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-headset">
+                    </i>
+                    <h3>Hỗ Trợ 24/7 </h3>
+                    <p>Chúng tôi cung cấp dịch vụ chăm sóc sức khỏe trực tuyến liên tục, luôn sẵn sàng hỗ trợ bạn bất cứ
+                        lúc nào, bất kỳ đâu, với đội ngũ nhân viên giàu kinh nghiệm</p>
+                </div>
+            </div>
+        </div>
 
 
-                {% if not show_patients %}
-                <div class="table-responsive"
-                     style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; margin:5px">
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>Tên thuốc</th>
-                            <th>Đơn vị thuốc</th>
-                            <th>Giá tiền</th>
-                            <th>Thêm</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for x in medicines %}
-                            <tr>
-                                <td>{{ x.name }}</td>
-                                <td>{{ x.unit_id }}</td>
-                                <td>{{ x.price }}</td>
-                                <td>
-                                    <button class="btn btn-primary btn-sm"
-                                            onclick="addToCart({{ x.id }}, '{{ x.name }}', '{{ x.unit_id }}')">+</button>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+        <div class="why-choose-us">
+            <div class="why-choose-us-text">
+                <h3>Tạo sao nên chọn chúng tôi?</h3>
+                <h2>
+                    Chúng tôi sẽ giúp gia đình bạn chăm sóc sức khỏe dễ dàng hơn </h2>
+                <p>
+                    "Với đội ngũ bác sĩ giàu kinh nghiệm và trang thiết bị hiện đại, phòng khám của chúng tôi cam kết
+                    mang đến dịch vụ chăm sóc sức khỏe chất lượng cao. Hãy đến với chúng tôi để cảm nhận sự khác biệt và
+                    yên tâm về sức khỏe của bạn!"</p>
+                <div class="buttons">
+                    <a class="learn-more" href="#">Tìm Hiểu Thêm</a>
+                    <a class="watch-video" href="#">Xem Video</a>
                 </div>
-                {% endif %}
+            </div>
+            <div class="doctor-image">
+                <img alt="" height="300"
+                    src="https://storage.googleapis.com/a1aa/image/VWBQYfiaGUSqMqI7cv87JiLAeEvgwBoNvmHaPHV4muwLWh8TA.jpg"
+                    width="300" />
+                <div class="stats">
+                    60k+
+                    <br />
+                    Bệnh Nhân Đã Được Giúp Đỡ
+                </div>
+                <div class="stats bottom">
+                    560+
+                    <br />
+                    Đối Tác Y Tế
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Contact -->
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <form id="phieu-kham-form" onsubmit="submitForm(event)">
-        <div class="form-container">
-            <div class="form-header">
-                <h3 class="">Thông tin bệnh nhân</h3>
-            </div>
-            <div class="form-body">
-                <div class="grid">
-                    <div>
-                        <label for="name-of-patient">Họ tên</label>
-                        <input id="name-of-patient" placeholder="Tên của bệnh nhân" oninput="saveFormData()" readonly />
-                    </div>
-                    <div>
-                        <label for="appointment-date" oninput="saveFormData()" >Ngày khám </label>
-                        <input id="appointment-date" name="appointment-date" type="datetime-local" placeholder="Ngày khám bệnh" oninput="saveFormData()"/>
-                    </div>
-                    <div>
-                        <label for="phone">Số điện thoại</label>
-                        <input id="phone" name="phone" type="text" oninput="saveFormData()" readonly />
-                    </div>
-                    <div>
-                        <label for="symptom" >Triệu chứng</label>
-                        <input id="symptom" name="trieu_chung" type="text" oninput="saveFormData()"/>
-                    </div>
+    <div class="contact-form-container">
+        <div class="contact-form-section">
+            <h1 class="contact-form-title">Liên hệ </h1>
+            <p class="contact-form-description">
+                Bạn muốn hợp tác hoặc trò chuyện trực tiếp, hãy liên hệ
+                với chúng tôi hoặc điền vào biểu mẫu, chúng tôi sẽ phản hồi bạn một cách nhanh chóng.</p>
+            <form>
+                <div class="contact-form-group">
+                    <label class="contact-form-label">Tên </label>
+                    <input class="contact-form-input" type="text" />
                 </div>
-                <div class="du-doan-label">
-                    <label for="predict">Dự đoán bệnh</label>
-                    <input id="predict" name="du_doan_benh" type="text" oninput="saveFormData()"/>
+                <div class="contact-form-group">
+                    <label class="contact-form-label">Email
+                    </label>
+                    <input class="contact-form-input" type="email" />
                 </div>
+                <div class="contact-form-group">
+                    <label class="contact-form-label">Lời nhắn gởi</label>
+                    <textarea class="contact-form-textarea" placeholder="Nhập vào đây diều bạn muốn nói..."
+                        rows="4"></textarea>
+                </div>
+                <button class="contact-form-submit-button" type="submit">Gởi lời nhắn</button>
+            </form>
+        </div>
+        <div class="contact-info-section">
+            <img alt="Decorative image with envelope, chat bubble, and paper plane" class="contact-info-image"
+                height="300"
+                src="https://storage.googleapis.com/a1aa/image/542S5JgPzYJMB9fD4OfqZYKoISgXmxaaknojrX6pbQcnlv8TA.jpg"
+                width="300" />
+            <div class="contact-info-item">
+                <i class="fas fa-map-marker-alt contact-info-icon"></i>
+                <span>70/8 Trần Thị Liền, Phước Kiển, Nhà Bè, TP.HCM</span>
             </div>
-
-            <div class="form-header">
-                <h3 class="">Đơn thuốc</h3>
+            <div class="contact-info-item">
+                <i class="fas fa-phone-alt contact-info-icon"></i>
+                <span>0947XXXXXX</span>
             </div>
-
-            <div class="table-container">
-                <table class="table-medicine">
-                    <thead>
-                    <tr>
-                        <th>Mã thuốc</th>
-                        <th>Thuốc</th>
-                        <th>Đơn vị</th>
-                        <th>Số lượng</th>
-                        <th>Cách dùng</th>
-                        <th>Xóa</th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-                    {% for c in session['cart'].values() %}
-                    <tr id="cart{{ c.id }}">
-                        <td>{{ c.id }}</td>
-                        <td>{{ c.name }}</td>
-                        <td>{{ c.unit }}</td>
-                        <td>
-                            <input onblur="updateCart({{ c.id }}, this)" type="number" value="{{ c.quantity }}" class="form-control" />
-                        </td>
-                        <td><input id="cach-dung-{{ c.id }}" name="cach-dung-{{ c.id }}" value="{{ c.cach_dung or '' }}" type="text" oninput="saveFormData()" onblur="updateCachDung({{ c.id }}, this)"/></td>
-                        <td>
-                            <button class="btn btn-danger" onclick="deleteCart({{ c.id }})">&times;</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                </table>
+            <div class="contact-info-item">
+                <i class="fas fa-envelope contact-info-icon"></i>
+                <span>PokeClinic@gmail.com</span>
             </div>
-
-
-            <div class="form-footer">
-                <button class="cancel-btn">Hủy</button>
-                <button class="add-btn" type="submit" onclick="confirm_phieukham()">Thêm</button>
+            <div class="contact-social-icons">
+                <a class="contact-icon-link" href="#"><i class="fab fa-facebook"></i></a>
+                <a class="contact-icon-link" href="#"><i class="fab fa-twitter"></i></a>
+                <a class="contact-icon-link" href="#"><i class="fab fa-instagram"></i></a>
             </div>
         </div>
-        </form>
     </div>
-</div>
-</div>
-
-
 {% endblock %}

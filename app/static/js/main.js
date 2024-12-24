@@ -179,6 +179,7 @@ function confirm_phieukham() {
 
 //RECEIPT
 
+
 function getPhieuKham(phieuKhamId) {
     fetch(`/api/phieu_kham/${phieuKhamId}`)
         .then(response => response.json())
@@ -212,3 +213,37 @@ var phieuKhamId = document.querySelector('#phieu_kham_id').textContent;  // Lấ
 }
 
 }
+
+
+
+// DS KHAM
+function submitDanhSach() {
+    // Lấy tất cả các checkbox được chọn
+    const checkboxes = document.querySelectorAll('#phieu-dang-lap tbody input[type="checkbox"]:checked');
+    const selectedPhieuIds = Array.from(checkboxes).map(cb => cb.dataset.phieuId); // Lấy danh sách ID từ data attribute
+
+    // Kiểm tra nếu không có phiếu nào được chọn
+    if (selectedPhieuIds.length === 0) {
+        alert('Vui lòng chọn ít nhất một phiếu để lập danh sách!');
+        return;
+    }
+
+    // Gửi dữ liệu qua AJAX (Fetch API)
+    fetch('/lap-danh-sach', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phieu_ids: selectedPhieuIds }),
+    })
+        .then(response => {
+            if (response.ok) {
+                alert('Lập danh sách thành công!');
+                location.reload(); // Reload lại trang
+            } else {
+                alert('Có lỗi xảy ra, vui lòng thử lại.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+

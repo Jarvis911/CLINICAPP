@@ -14,6 +14,7 @@ class UserRole(RoleEnum):
     USER = 5
 
 class User(db.Model, UserMixin):
+    __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
     username = Column(String(100), nullable=False, unique=True)
@@ -26,13 +27,14 @@ class User(db.Model, UserMixin):
     user_role = Column(Enum(UserRole), default=UserRole.USER)
 
 
+#Fix birthday -> Age
 class BenhNhan(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
     gender = Column(String(50), nullable=False)
     phone = Column(String(10), nullable=False, unique=True)
     email = Column(String(100), nullable=True)
-    birthday = Column(String(30), nullable=False)
+    birth = Column(DateTime, nullable=True, default=None)
 
     phieu_khams = relationship('PhieuKham', backref='phieu_kham', lazy=True)
 
@@ -56,7 +58,7 @@ class YTa(User):
     chungChi = Column(String(100), nullable=True)
     chuyenMon = Column(String(100), nullable=True)
 
-
+    ds_kham = relationship('DsKham', backref='ds_kham', lazy=True)
 
 class ThuNgan(User):
     id = Column(Integer, ForeignKey('user.id'), primary_key=True)
@@ -84,13 +86,21 @@ class LoaiThuoc(db.Model):
         return self.tenLoaiThuoc
 
 
-class PhieuDangKy(db.Model):
+class DsKham(db.Model):
+    __tablename__ ='ds_kham'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(50), nullable=False)
-    phoneNumber = Column(String(20), nullable=False)
-    gender = Column(String(30), nullable=False)
-    birthDay = Column(String(50), nullable=False)
-    diaChi = Column(String(100), nullable=True)
+    created_date = Column(DateTime, default=datetime.now())
+    y_ta_id = Column(Integer, ForeignKey(YTa.id), nullable=False)
+    dangKyKhams = relationship("DangKyKham", backref="ds_kham")
+
+class DangKyKham(db.Model):
+    __tablename__ ='dang_ky_kham'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    appointment_date = Column(DateTime, default=datetime.now())
+    created_date = Column(DateTime)
+    state = Column(Boolean, nullable=True)
+    benhNhan_id = Column(Integer, ForeignKey(BenhNhan.id), nullable=False)
+    dsKham_id = Column(Integer, ForeignKey(DsKham.id), nullable=True)
 
 
 class DonViThuoc(db.Model):
@@ -114,7 +124,7 @@ class Thuoc(db.Model):
 class PhieuKham(db.Model):
     __tablename__ = 'phieu_kham'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    date_kham = Column(DateTime, nullable=True, default=datetime.utcnow)
+    date_kham = Column(DateTime, nullable=True, default=datetime.now())
     trieu_chung = Column(String(200), nullable=True)
     du_doan_benh = Column(String(200), nullable=True)
     da_xuat_hoa_don = Column(Boolean, default=False)
@@ -125,12 +135,13 @@ class PhieuKham(db.Model):
     hoa_don = relationship("HoaDon", uselist=False, backref="phieu_kham")
 
 
-
+#Fix add created_date
 class DonThuoc(db.Model):
     __tablename__ = 'don_thuoc'
     id = Column(Integer, primary_key=True, autoincrement=True)
     quantity = Column(Integer, nullable=False)
     cach_dung = Column(String(200), nullable=True, default="Không có")
+    created_date = Column(DateTime, default=datetime.now())
 
     phieu_kham_id = Column(Integer, ForeignKey('phieu_kham.id'), primary_key=True, nullable=False)
     thuoc_id = Column(Integer, ForeignKey('thuoc.id'), primary_key=True, nullable=False)
@@ -317,5 +328,49 @@ if __name__ == '__main__':
         #             bangCap=cas['bangCap']
         #             )
         #     db.session.add(cas)
+
+        #DATA NURSE
+
+        # nurse = [
+        #         {
+        #             "name": "Hoang Thai Huy",
+        #             "username": "nurseA",
+        #             "password": "123",  # MD5 của "admin"
+        #             "gender": "Male",
+        #             "phone": "0912005670",
+        #             "email": "nguyenvana@example.com",
+        #             "avatar": "https://res.cloudinary.com/dpfbtypxx/image/upload/v1734261617/pengu_iaejdc.jpg",
+        #             "user_role": 2,
+        #             "chungChi": "Y tá cấp 2",
+        #             "chuyenMon": "Điều dưỡng"
+        #         },
+        #         {
+        #             "name": "Lam Van Hai",
+        #             "username": "nurseB",
+        #             "password": "123",  # MD5 của "admin"
+        #             "gender": "Male",
+        #             "phone": "0912005670",
+        #             "email": "nguyenvana@example.com",
+        #             "avatar": "https://res.cloudinary.com/dpfbtypxx/image/upload/v1734261617/pengu_iaejdc.jpg",
+        #             "user_role": 2,
+        #             "chungChi": "Y tá cấp 4",
+        #             "chuyenMon": "Hồi sức"
+        #         }]
+        #
+        #
+        # for nur in nurse:
+        #     nur = YTa(
+        #             name=nur['name'],
+        #             username=nur['username'],
+        #             password=str(hashlib.md5(nur['password'].encode('utf-8')).hexdigest()),  # MD5 hash đã được tạo sẵn
+        #             gender=nur['gender'],
+        #             phone=nur['phone'],
+        #             email=nur['email'],
+        #             avatar=nur['avatar'],
+        #             user_role=UserRole.YTa,  # Enum cho vai trò bác sĩ
+        #             chungChi=nur['chungChi'],
+        #             chuyenMon=nur['chuyenMon']
+        #             )
+        #     db.session.add(nur)
 
         db.session.commit()

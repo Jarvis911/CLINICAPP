@@ -1,10 +1,14 @@
-from app.models import (User, BenhNhan, Thuoc, PhieuKham, DonThuoc,
-                        DonViThuoc, HoaDon, QuyDinh, ThuNgan)
+from app.models import (User, BenhNhan, Thuoc, PhieuKham, DonThuoc, BacSi,
+                        DonViThuoc, HoaDon, QuyDinh, ThuNgan, DangKyKham, DsKham)
 from datetime import datetime
 from app import app, db
+from typing import cast
 import hashlib
+from sqlalchemy import and_
+from sqlalchemy.types import Date
 import cloudinary.uploader
 from flask_login import current_user
+from sqlalchemy.orm import aliased
 
 
 def get_user_by_id(id):
@@ -149,6 +153,19 @@ def get_benh_nhan_name(phieu_kham_id):
     benh_nhan = BenhNhan.query.get(phieu_kham.id_benh_nhan)
 
     return benh_nhan.name
+
+def get_benh_nhan_name_phieudk(dang_ky_kham_id):
+    dang_ky_kham = DangKyKham.query.get(dang_ky_kham_id)
+    benh_nhan = BenhNhan.query.get(dang_ky_kham.id_benh_nhan)
+
+    return benh_nhan.name
+
+def get_benh_nhan_phone_phieudk(dang_ky_kham_id):
+    dang_ky_kham = DangKyKham.query.get(dang_ky_kham_id)
+    benh_nhan = BenhNhan.query.get(dang_ky_kham.id_benh_nhan)
+
+    return benh_nhan.phone
+
 def get_tong_tien_thuoc(phieu_kham_id):
     phieu_kham = PhieuKham.query.get(phieu_kham_id)
     quy_dinh = QuyDinh.query.first()
@@ -157,5 +174,91 @@ def get_tong_tien_thuoc(phieu_kham_id):
         if don_thuoc.thuoc:  # Kiểm tra xem đơn thuốc có liên kết với thuốc không
             tong_tien_thuoc += don_thuoc.quantity * don_thuoc.thuoc.price  # Cộng dồn giá * số lượng
 
-
     return tong_tien_thuoc + quy_dinh.examineFee
+
+
+def load_doctors():
+    return BacSi.query.all()
+
+def add_ExamineForm(phone,name, birth, gender, email, appointment_date):
+
+    patient = BenhNhan.query.filter(BenhNhan.phone.__eq__(phone)).first()
+    if not patient:
+        patient = BenhNhan(
+            name=name,
+            phone=phone,
+            birth=birth,
+            gender=gender,
+            email=email,
+
+        )
+        db.session.add(patient)
+        db.session.commit()
+
+    new_DangKyKham = DangKyKham(
+        benhNhan_id=patient.id,
+        appointment_date=appointment_date,
+        created_date=datetime.now(),
+        state=False
+    )
+    db.session.add(new_DangKyKham)
+    db.session.commit()
+
+    return "Đăng kí khám đã được ghi nhận, xin vui lòng chờ mail từ chúng tôi!"
+
+
+
+#LAP DANH SACH KHAM
+def get_phieu_list(date):
+    # Đảm bảo định dạng của `date` đầu vào là datetime
+    date_obj = datetime.strptime(date, '%Y-%m-%d')  # Chuyển chuỗi `date` về datetime
+
+    # Tạo alias cho bảng BenhNhan
+    BenhNhanAlias = aliased(BenhNhan)
+
+    # Truy vấn kết hợp hai bảng
+    phieus = db.session.query(
+        DangKyKham.id,
+        DangKyKham.appointment_date,
+        BenhNhanAlias.name.label('benh_nhan_name'),
+        BenhNhanAlias.phone.label('benh_nhan_phone')
+    ).join(
+        BenhNhanAlias, DangKyKham.benhNhan_id == BenhNhanAlias.id
+    ).filter(
+        DangKyKham.state == 0,
+        DangKyKham.appointment_date == date_obj
+    ).all()
+
+    # Chuyển kết quả thành danh sách dictionary
+    result = [
+        {
+            "phieu_id": phieu.id,
+            "appointment_date": phieu.appointment_date,
+            "benh_nhan_name": phieu.benh_nhan_name,
+            "benh_nhan_phone": phieu.benh_nhan_phone
+        }
+        for phieu in phieus
+    ]
+
+    # Debug log kết quả
+    print(f"Filtered phieus with patient info: {result}")
+
+    return result
+
+def add_ds_kham(phieu_ids):
+    # Lấy thông tin user hiện tại (ví dụ: thu_ngan_id)
+    y_ta_id = current_user.id  # Thay bằng thông tin từ session hoặc logic xác định
+
+    # Tạo một danh sách khám mới
+    danh_sach_kham = DsKham(y_ta_id=y_ta_id, created_date=datetime.now())
+    db.session.add(danh_sach_kham)
+    db.session.flush()  # Lưu tạm để lấy `id` của danh sách khám
+
+    # Cập nhật các phiếu đăng ký được chọn
+    DangKyKham.query.filter(DangKyKham.id.in_(phieu_ids)).update(
+        {DangKyKham.dsKham_id: danh_sach_kham.id,
+         DangKyKham.state: True}, synchronize_session=False
+    )
+
+    db.session.commit()
+

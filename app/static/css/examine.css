@@ -1,0 +1,92 @@
+body {
+    background-color: #f3f9fd;
+}
+.main-content {
+    padding: 2rem 5rem;
+}
+
+.form-body {
+    margin: 2rem 0;
+}
+
+.form-container {
+    background-color: white;
+    padding: 3rem;
+    margin: 0 13rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 12px rgba(7, 90, 88, 0.3);
+}
+
+.form-header {
+    background: linear-gradient(to right, rgb(62, 111, 127), rgba(8, 42, 38, 0));
+    color: white;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+
+.form-header h3 {
+    margin: 0;
+}
+
+.form-body .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.form-body label {
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+.form-body input,
+.form-body select {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    background-color: #f7fafc;
+    box-sizing: border-box;
+}
+
+
+.form-container #reason-of-appointment {
+    padding-bottom: 3rem;
+    margin-bottom: 2rem;
+}
+
+.form-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.cancel-btn,
+.add-btn {
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    margin-left: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: none;
+    box-shadow: 0 10px 12px rgba(7, 90, 88, 0.3);
+}
+
+.cancel-btn {
+    background-color: #e2e8f0;
+    color: #4A5568;
+}
+
+.cancel-btn:hover {
+    background-color: #edf2f7;
+}
+
+.add-btn {
+    background-color: #3182ce;
+    color: white;
+}
+
+.add-btn:hover {
+    background-color: #2b6cb0;
+}

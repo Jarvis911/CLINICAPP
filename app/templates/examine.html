@@ -1,0 +1,79 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}
+<title>Đăng kí khám bệnh</title>
+{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/examine.css') }}" rel="stylesheet"/>
+{% endblock %}
+
+
+{% block content %}
+
+{% if success_msg %}
+<div class="alert alert-success">{{ success_msg }}</div>
+{% endif %}
+
+
+<div class="flex">
+    <!-- Main Content -->
+    <div class="main-content">
+        <form id="examine-form" method="post">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2 class="">Thông tin đăng kí khám</h2>
+                </div>
+                <div class="form-body">
+                    <div class="grid">
+                        <div>
+                            <label for="name-of-patient">Họ tên</label>
+                            <input id="name-of-patient" name="name" placeholder="Tên của bệnh nhân..." required/>
+                        </div>
+                        <div>
+                            <label for="appointment-date">Ngày khám</label>
+                            <input id="appointment-date" name="appointment_date" required type="date"/>
+                        </div>
+                        <div>
+                            <label for="phone">Số điện thoại</label>
+                            <input id="phone" name="phone" required type="text"/>
+                        </div>
+                        <div>
+                            <label for="birth">Ngày sinh</label>
+                            <input id="birth" name="birth" placeholder="Ngày sinh của bệnh nhân..." required type="date"/>
+                        </div>
+                        <div>
+                            <label for="email">Email</label>
+                            <input id="email" name="email" placeholder="Email liên hệ..." type="email"/>
+                        </div>
+                        <div>
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option>Male</option>
+                                <option>Female</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-header">
+                    <h2>Nhu cầu đăng kí</h2>
+                </div>
+                <div class="form-body">
+                    <label for="reason-of-appointment">Lý do khám bệnh</label>
+                    <input id="reason-of-appointment" type="Điền lý do khám bệnh của bạn tại đây"/>
+<!--                    <label for="doctor-to-appointment">Bác sĩ đặt lịch</label>-->
+<!--                    <select id="doctor-to-appointment">-->
+<!--                        <option disabled selected style="color:rgba(128, 128, 128, 0.371)" value="">Chọn bác sĩ...-->
+<!--                        </option>-->
+<!--                    </select>-->
+                </div>
+                <div class="form-footer">
+                    <button class="cancel-btn">Hủy</button>
+                    <button class="add-btn" type="submit">Thêm</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
