@@ -53,3 +53,13 @@ table th {
     margin-top: 1rem;
     margin-right: 12rem;
 }
+
+.mb-0 {
+    display: flex;
+    justify-content: center;
+}
+
+.form-group {
+    display: flex;
+    width: 500px;
+}

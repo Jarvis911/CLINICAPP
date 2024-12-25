@@ -1,106 +1,132 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-<h1 class="text-info mt-1">CHÀO MỪNG ĐẾN VỚI TRANG QUẢN TRỊ!</h1>
-<h2 class="text-danger">Chào {{ current_user.username }}.</h2>
+<h1 class="text-center text-danger mt-1 mb-5">THỐNG KÊ - BÁO CÁO</h1>
 
-<div class="row">
-    <div class="col-md-6 col-12">
-        <table class="table">
-            <tr>
-                <th>Id</th>
-                <th>Tên sản phẩm</th>
-                <th>Tổng doanh thu</th>
-            </tr>
-            {% for s in stats %}
-            <tr>
-                <td>{{ s[0] }}</td>
-                <td>{{ s[1] }}</td>
-                <td>{{ "{:,.0f}".format(s[2]) }} VNĐ</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-    <div class="col-md-6 col-12">
-        <canvas id="myChart"></canvas>
-    </div>
-</div>
 
+<form method="GET" >
+    <label for="month">Chọn tháng:</label>
+    <select name="month" id="month">
+        <option value="1" {% if selected_month == 1 %}selected{% endif %}>Tháng 1</option>
+        <option value="2" {% if selected_month == 2 %}selected{% endif %}>Tháng 2</option>
+        <option value="3" {% if selected_month == 3 %}selected{% endif %}>Tháng 3</option>
+        <option value="4" {% if selected_month == 4 %}selected{% endif %}>Tháng 4</option>
+        <option value="5" {% if selected_month == 5 %}selected{% endif %}>Tháng 5</option>
+        <option value="6" {% if selected_month == 6 %}selected{% endif %}>Tháng 6</option>
+        <option value="7" {% if selected_month == 7 %}selected{% endif %}>Tháng 7</option>
+        <option value="8" {% if selected_month == 8 %}selected{% endif %}>Tháng 8</option>
+        <option value="9" {% if selected_month == 9 %}selected{% endif %}>Tháng 9</option>
+        <option value="10" {% if selected_month == 10 %}selected{% endif %}>Tháng 10</option>
+        <option value="11" {% if selected_month == 11 %}selected{% endif %}>Tháng 11</option>
+        <option value="12" {% if selected_month == 12 %}selected{% endif %}>Tháng 12</option>
+    </select>
+
+    <button type="submit">Thống kê</button>
+</form>
+<h1 class="text-center mt-1 mb-5 " style="font-size: 35px; color: black;">DOANH THU - THÁNG {{ month }} </h1>
 <div class="row">
-    <div class="col-md-6 col-12">
-        <table class="table">
+    <div class="col-md-7 col-12">
+    <table class="table table-bordered">
+        <thead>
             <tr>
-                <th>Thời gian</th>
-                <th>Tổng doanh thu</th>
+                <th>Ngày</th>
+                <th>Doanh thu</th>
+                <th>Số bệnh nhân khám</th>
+                <th>Tỉ lệ doanh thu</th>
             </tr>
+        </thead>
+        <tbody>
             {% for s in stats2 %}
             <tr>
                 <td>{{ s[0] }}</td>
-
-                <td>{{ "{:,.0f}".format(s[1]) }} VNĐ</td>
+                <td>{{ s[1] }} VND</td>
+                <td>{{ s[2] }}</td>
+                <td>
+                    {% if total_revenue > 0 %}
+                    {{ (s[1] / total_revenue * 100) | round(2) }}%
+                    {% else %}
+                    0%
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
-        </table>
-    </div>
-    <div class="col-md-6 col-12">
+        </tbody>
+    </table>
+        <h1 class="text-center mt-3 mb-5 " style="font-size: 25px; color: black;">TỔNG CỘNG: {{ total_revenue }} VNĐ </h1>
+</div>
+    <div class="col-md-5 col-12">
         <canvas id="myChart2"></canvas>
     </div>
 </div>
-
-
+<h1 class="text-center mt-1 mb-5 " style="font-size: 35px; color: black;">TẦN SUẤT SỬ DỤNG THUỐC - THÁNG {{ month }} </h1>
+<div class="row">
+    <div class="col-md-7 col-12">
+    <table class="table table-bordered">
+    <tr>
+        <th>Tên thuốc</th>
+        <th>Tên đơn vị</th>
+        <th>Số lượng kê đơn</th>
+    </tr>
+    {% for stat in stats3 %}
+    <tr>
+        <td>{{ stat.medicine_name }}</td>
+        <td>{{ stat.unit_name }}</td>
+        <td>{{ stat.total_quantity }}</td>
+    </tr>
+    {% endfor %}
+</table>
+    </div>
+    <div class="col-md-5 col-12">
+        <canvas id="myChart3"></canvas>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-
-    <!--TABLE-->
-        let data = [];
-        let labels = [];
-        let data2 = [];
-        let labels2 = [];
-
-        {% for s in stats %}
-            labels.push('{{ s[1] }}');
-            data.push({{ s[2] }});
-        {% endfor %}
-
-        {% for s in stats2 %}
-            labels2.push({{ s[0] }});
-            data2.push({{ s[1] }});
-        {% endfor %}
-        {% for s in stats2 %}
-                labels2.push({{ s[0] }});
-                data2.push({{ s[1] }});
-         {% endfor %}
-
-          function draw(ctx, data, labels) {
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                  labels: labels,
-                  datasets: [{
-                    label: '# Doanh thu',
+    function draw(ctx, data, labels) {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: ' ',
                     data: data,
                     borderWidth: 1,
-                    backgroundColor: ['red', 'green', 'blue', 'gold', 'brown']
-                  }]
-                },
-                options: {
-                  scales: {
+                    backgroundColor: ['red', 'green', 'blue', 'gold', 'brown', 'purple', 'orange']
+                }]
+            },
+            options: {
+                scales: {
                     y: {
-                      beginAtZero: true
+                        beginAtZero: true
                     }
-                  }
                 }
-              });
-        }
-        window.onload = function() {
-            const ctx = document.getElementById('myChart');
-            const ctx2 = document.getElementById('myChart2');
+            }
+        });
+    }
 
-            draw(ctx, data, labels);
-            draw(ctx2, data2, labels2);
 
-        }
+    let data2 = [];
+    let labels2 = [];
+
+    {% for s in stats2 %}
+    data2.push({{ s[1] }})
+    labels2.push({{ s[0] }})
+    {% endfor %}
+
+    let data3 = [];
+    let labels3 = [];
+
+     {% for s in stats3 %}
+     data3.push({{ s[2] }}) // Số lượng kê đơn
+     labels3.push("{{ s[0] }}")// Nhãn là tên thuốc
+    {% endfor %}
+
+    window.onload = function() {
+        const ctx2 = document.getElementById('myChart2').getContext('2d');
+        draw(ctx2, data2, labels2);
+
+        const ctx3 = document.getElementById('myChart3').getContext('2d');
+        draw(ctx3, data3, labels3);
+    }
 </script>
-
-
 {% endblock %}

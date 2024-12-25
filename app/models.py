@@ -171,9 +171,6 @@ def check_thuoc_limit(mapper, connect, target):
     session = db.session
     current_count = session.query(Thuoc).count()
 
-    maxNum = QuyDinh.query.first().numOfMed()
-    if current_count >= maxNum:
-        raise Exception("Không thể thêm thuốc mới. Số lượng đã đạt giới hạn quy định.")
 
 
 if __name__ == '__main__':
@@ -188,16 +185,44 @@ if __name__ == '__main__':
         # dv2 = DonViThuoc(name="Viên")
         # dv3 = DonViThuoc(name="Lọ")
         # db.session.add_all([dv1, dv2, dv3])
-        #
+
+
         # l1 = LoaiThuoc(tenLoaiThuoc="Kháng sinh")
         # l2 = LoaiThuoc(tenLoaiThuoc="Cảm cúm")
         # l3 = LoaiThuoc(tenLoaiThuoc="Đau bụng")
-        # db.session.add_all([l1,l2,l3])
+        # l4 = LoaiThuoc(tenLoaiThuoc="Hạ sốt")
+        # l5 = LoaiThuoc(tenLoaiThuoc="Viêm gan")
+        # l6 = LoaiThuoc(tenLoaiThuoc="Dị ứng")
+        # l7 = LoaiThuoc(tenLoaiThuoc="Tăng huyết áp")
+        # db.session.add_all([l4,l5,l6,l7])
         #
         # t1 = Thuoc(name='Paracetamol', unit_id=1, price=100000, loai_thuoc_id=2)
         # t2 = Thuoc(name='Chlorpromazin', unit_id=2, price=10000, loai_thuoc_id=1)
         # t3 = Thuoc(name='Berberin', unit_id=3, price=12000, loai_thuoc_id=3)
         # db.session.add_all([t1, t2, t3])
+
+        # t4 = Thuoc(name='Ibuprofen', unit_id=1, price=15000, loai_thuoc_id=2)
+        # t5 = Thuoc(name='Aspirin', unit_id=2, price=20000, loai_thuoc_id=4)
+        # t6 = Thuoc(name='Omeprazole', unit_id=3, price=25000, loai_thuoc_id=3)
+        # t7 = Thuoc(name='Metformin', unit_id=1, price=30000, loai_thuoc_id=5)
+        # t8 = Thuoc(name='Cefuroxime', unit_id=2, price=35000, loai_thuoc_id=1)
+        # t9 = Thuoc(name='Diphenhydramine', unit_id=3, price=18000, loai_thuoc_id=6)
+        # t10 = Thuoc(name='Diazepam', unit_id=1, price=22000, loai_thuoc_id=1)
+        # t11 = Thuoc(name='Loratadine', unit_id=2, price=16000, loai_thuoc_id=6)
+        # t12 = Thuoc(name='Simvastatin', unit_id=3, price=90000, loai_thuoc_id=7)
+        # t13 = Thuoc(name='Atorvastatin', unit_id=1, price=95000, loai_thuoc_id=7)
+        # t14 = Thuoc(name='Pantoprazole', unit_id=2, price=28000, loai_thuoc_id=3)
+        # t15 = Thuoc(name='Azithromycin', unit_id=3, price=70000, loai_thuoc_id=1)
+        # t16 = Thuoc(name='Losartan', unit_id=1, price=35000, loai_thuoc_id=7)
+        # t17 = Thuoc(name='Furosemide', unit_id=2, price=25000, loai_thuoc_id=7)
+        # t18 = Thuoc(name='Naproxen', unit_id=3, price=27000, loai_thuoc_id=2)
+        # t19 = Thuoc(name='Ciprofloxacin', unit_id=1, price=35000, loai_thuoc_id=1)
+        # t20 = Thuoc(name='Ranitidine', unit_id=2, price=24000, loai_thuoc_id=3)
+        #
+        # # Thêm vào cơ sở dữ liệu
+        # db.session.add_all([t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20])
+        # db.session.commit()
+
         #
         # bn1 = BenhNhan(name="Hồ Đức Trí", gender="Nam", phone="0914117035", birth="2004-02-02")
         # bn2 = BenhNhan(name="Nguyễn Kiều Phước", gender="Nam", phone="0914117036", birth="2004-02-02")
@@ -399,5 +424,33 @@ if __name__ == '__main__':
         #     user_role=UserRole.ADMIN
         # )
         # db.session.add(admin_user)
+        # def generate_and_add_patients():
+        #     from faker import Faker
+        #     import random
+        #
+        #     faker = Faker()
+        #     patients = []
+        #
+        #     # Tạo dữ liệu bệnh nhân
+        #     for _ in range(100):
+        #         gender = random.choice(['Male', 'Female'])
+        #         name = faker.name_male() if gender == 'Male' else faker.name_female()
+        #         patients.append(BenhNhan(
+        #             name=name,
+        #             gender=gender,
+        #             phone=faker.unique.phone_number()[:10],
+        #             email=faker.email(),
+        #             birth=faker.date_of_birth(minimum_age=18, maximum_age=80)
+        #         ))
+        #
+        #     # Thêm vào cơ sở dữ liệu
+        #     db.session.bulk_save_objects(patients)
+        #     db.session.commit()
+        #     print("Đã thêm 100 bệnh nhân vào cơ sở dữ liệu.")
+        #
+        #
+        # # Gọi hàm
+        # generate_and_add_patients()
+
 
         db.session.commit()

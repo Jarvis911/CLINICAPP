@@ -7,12 +7,16 @@
             {% if current_user.user_role==user_role.BacSi %}
                 <li><a href="/doctorform">Khám Bệnh</a></li>
             {% endif %}
-            {% if current_user.user_role==user_role.ThuNgan%}
+            {% if current_user.user_role==user_role.ThuNgan %}
                 <li><a href="/receipt">Lập Hóa Đơn</a></li>
             {% endif %}
-            {% if current_user.user_role ==user_role.YTa%}
+            {% if current_user.user_role ==user_role.YTa %}
                 <li><a href="/list">Lập Danh Sách Khám</a></li>
             {% endif %}
+            {% if current_user.user_role ==user_role.ADMIN %}
+                <li><a href="/admin">ADMIN</a></li>
+            {% endif %}
+
 
             {% if current_user.is_authenticated %}
             <li>

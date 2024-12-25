@@ -111,7 +111,7 @@
                     </div>
                     <div>
                         <label for="appointment-date" oninput="saveFormData()" >Ngày khám </label>
-                        <input id="appointment-date" name="appointment-date" type="datetime-local" placeholder="Ngày khám bệnh" oninput="saveFormData()"/>
+                        <input id="appointment-date" name="appointment-date" type="datetime-local" placeholder="Ngày khám bệnh" oninput="saveFormData()" required/>
                     </div>
                     <div>
                         <label for="phone">Số điện thoại</label>
@@ -119,12 +119,12 @@
                     </div>
                     <div>
                         <label for="symptom" >Triệu chứng</label>
-                        <input id="symptom" name="trieu_chung" type="text" oninput="saveFormData()"/>
+                        <input id="symptom" name="trieu_chung" type="text" oninput="saveFormData()" required/>
                     </div>
                 </div>
                 <div class="du-doan-label">
                     <label for="predict">Dự đoán bệnh</label>
-                    <input id="predict" name="du_doan_benh" type="text" oninput="saveFormData()"/>
+                    <input id="predict" name="du_doan_benh" type="text" oninput="saveFormData()" required/>
                 </div>
             </div>
 
@@ -154,7 +154,7 @@
                         <td>
                             <input onblur="updateCart({{ c.id }}, this)" type="number" value="{{ c.quantity }}" class="form-control" />
                         </td>
-                        <td><input id="cach-dung-{{ c.id }}" name="cach-dung-{{ c.id }}" value="{{ c.cach_dung or '' }}" type="text" oninput="saveFormData()" onblur="updateCachDung({{ c.id }}, this)"/></td>
+                        <td><input id="cach-dung-{{ c.id }}" name="cach-dung-{{ c.id }}" value="{{ c.cach_dung or '' }}" type="text" onblur="updateCachDung({{ c.id }}, this)" required/></td>
                         <td>
                             <button class="btn btn-danger" onclick="deleteCart({{ c.id }})">&times;</button>
                         </td>

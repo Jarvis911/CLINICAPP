@@ -4,7 +4,7 @@ from datetime import datetime
 from app import app, db
 from typing import cast
 import hashlib
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func, distinct
 from sqlalchemy.types import Date
 import cloudinary.uploader
 from flask_login import current_user
@@ -21,7 +21,8 @@ def load_medicines_unit():
 
 
 def load_patients(kw=None):
-    query = BenhNhan.query
+    query = BenhNhan.query.join(PhieuKham, PhieuKham.id_benh_nhan == BenhNhan.id, isouter=True) \
+        .filter(PhieuKham.id.is_(None))
 
     if kw:
         query = query.filter(BenhNhan.name.contains(kw))
@@ -280,23 +281,39 @@ def add_ds_kham(phieu_ids):
 
     #THONG KE
 
-    # def revenue_stats(kw=None):
-    #     query = db.session.query(Thuoc.id, Thuoc.name, func.sum(ReceiptDetails.quantity * ReceiptDetails.unit_price)) \
-    #         .join(ReceiptDetails, ReceiptDetails.thuoc_id.__eq__(Thuoc.id)).group_by(Thuoc.id)
-    #
-    #     if kw:
-    #         query = query.filter(Thuoc.name.contains(kw))
-    #
-    #     return query.all()
-    #
-    # def period_stats(p='month', year=datetime.now().year):
-    #     return db.session.query(func.extract(p, Receipt.created_date),
-    #                             func.sum(ReceiptDetails.quantity * ReceiptDetails.unit_price)) \
-    #         .join(ReceiptDetails, ReceiptDetails.receipt_id.__eq__(Receipt.id)) \
-    #         .group_by(func.extract(p, Receipt.created_date), func.extract('year', Receipt.created_date)) \
-    #         .order_by().all()
+def revenue_stats_by_time(month=datetime.now().month, year=datetime.now().year):
+    stats = db.session.query(
+        func.extract('day', PhieuKham.date_kham).label('day'),  # Lấy ngày từ cột date_kham
+        func.sum(HoaDon.tong_tien),  # Tính tổng doanh thu
+        func.count(func.distinct(PhieuKham.id_benh_nhan))  # Đếm số bệnh nhân trong ngày (dùng distinct)
+    ) \
+        .join(HoaDon, HoaDon.phieu_kham_id == PhieuKham.id) \
+        .filter(func.extract('year', PhieuKham.date_kham) == year) \
+        .filter(func.extract('month', PhieuKham.date_kham) == month) \
+        .group_by(func.extract('day', PhieuKham.date_kham)) \
+        .order_by(func.extract('day', PhieuKham.date_kham)).all()
 
-    def stats_products():
-        return db.session.query(LoaiThuoc.id, LoaiThuoc.tenLoaiThuoc, func.count(Thuoc.id)) \
-            .join(Thuoc, Thuoc.LoaiThuoc_id.__eq__(LoaiThuoc.id), isouter=True).group_by(LoaiThuoc.id).all()
+    # Lấy tổng doanh thu của tháng
+    total_revenue = db.session.query(func.sum(HoaDon.tong_tien))\
+        .join(PhieuKham, HoaDon.phieu_kham_id == PhieuKham.id)\
+        .filter(func.extract('year', PhieuKham.date_kham) == year)\
+        .filter(func.extract('month', PhieuKham.date_kham) == month)\
+        .scalar()
 
+    return stats, total_revenue
+
+def medicine_statistics(month, year):
+    stats = db.session.query(
+        Thuoc.name.label('medicine_name'),  # Tên thuốc
+        DonViThuoc.name.label('unit_name'),  # Tên đơn vị
+        func.sum(DonThuoc.quantity).label('total_quantity')  # Tổng số lượng kê đơn
+    )\
+    .join(DonThuoc, DonThuoc.thuoc_id == Thuoc.id)\
+    .join(DonViThuoc, DonViThuoc.id == Thuoc.unit_id)\
+    .join(PhieuKham, PhieuKham.id == DonThuoc.phieu_kham_id)\
+    .filter(func.extract('month', PhieuKham.date_kham) == month)\
+    .filter(func.extract('year', PhieuKham.date_kham) == year)\
+    .group_by(Thuoc.name, DonViThuoc.name)\
+    .order_by(Thuoc.name).all()
+
+    return stats

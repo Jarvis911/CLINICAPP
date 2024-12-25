@@ -60,10 +60,10 @@ function saveFormData() {
                 if (data.appointment_date) {
                     document.getElementById("appointment-date").value = data.appointment_date;
                 }
-                if (data.gender) {
+                if (data.symptom) {
                     document.getElementById("symptom").value = data.symptom;
                 }
-                if (data.mobile) {
+                if (data.predict) {
                     document.getElementById("predict").value = data.predict;
                 }
             })
